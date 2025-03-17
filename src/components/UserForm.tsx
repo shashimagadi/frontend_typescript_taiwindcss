@@ -34,57 +34,99 @@ const UserForm = () => {
 
   
 
-  const handleSubmit = (values: any) => {
-    try{
+//   const handleSubmit =async (values: any) => {
+//     try{
 
-        const trimmedValues = {
-            name: values.name.trim(),
-            position: values.position.trim(),
-            description: values.description?.trim() || "", // Allow optional description
-          };
+//         const trimmedValues = {
+//             name: values.name.trim(),
+//             position: values.position.trim(),
+//             description: values.description?.trim() || "", // Allow optional description
+//           };
       
-          // ✅ Check if fields are empty after trimming
-          if (!trimmedValues.name || !trimmedValues.position || !trimmedValues.description) {
-            toast.warn("Name , Position, Description cannot be empty ");
-            return;
-          }
-        if (isEdit) {
-            dispatch(updateUser({ id: Number(id), ...trimmedValues  }));
-            navigate('/userDetails')
+//           let result;
+//           // ✅ Check if fields are empty after trimming
+//           if (!trimmedValues.name || !trimmedValues.position || !trimmedValues.description) {
+//             toast.warn("Name , Position, Description cannot be empty ");
+//             return;
+//           }
+//         if (isEdit) {
+//        result= await     dispatch(updateUser({ id: Number(id), ...trimmedValues  }));
             
-          } else {
+//             console.log("result after update ", result.payload.message==='success');
+//             //  
+//             if(result.payload.message==='success'){
+//                 navigate('/userDetails')
+//             }
+            
+//           } else {
               
-            dispatch(createUser(trimmedValues ));
-            navigate('/userDetails')
+//          result= await   dispatch(createUser(trimmedValues ));
+//          if(result.payload.message==='success'){
+//             navigate('/userDetails')
+//         }
             
-          }
+            
+//           }
 
          
         
-    }
-    catch(error:any){
-        if (error.response) {
-            // API responded with an error (e.g., 404, 500)
-            if (error.response.status === 404) {
-              toast.error("User not found!");
-            } else if (error.response.status === 400) {
-              toast.error("Invalid data. Please check your inputs.");
-            } else {
-              toast.error(error.response.data?.message || "Something went wrong!");
-            }
-          } else if (error.request) {
-            // No response from server (e.g., network issue)
-            toast.error("Server not responding. Please try again later.");
-          } else {
-            // Other unknown errors
-            toast.error("An unexpected error occurred.");
-          }
-    }
+//     }
+//     catch(error:any){
+//         if (error.response) {
+//             // API responded with an error (e.g., 404, 500)
+//             if (error.response.status === 404) {
+//               toast.error("User not found!");
+//             } else if (error.response.status === 400) {
+//               toast.error("Invalid data. Please check your inputs.");
+//             } else {
+//               toast.error(error.response.data?.message || "Something went wrong!");
+//             }
+//           } else if (error.request) {
+//             // No response from server (e.g., network issue)
+//             toast.error("Server not responding. Please try again later.");
+//           } 
+//     }
     
-    // navigate("/");
+//     // navigate("/");
+//   };
+
+const handleSubmit = async (values: any) => {
+    try {
+      const trimmedValues = {
+        name: values.name.trim(),
+        position: values.position.trim(),
+        description: values.description?.trim() || "",
+      };
+  
+      if (!trimmedValues.name || !trimmedValues.position || !trimmedValues.description) {
+        toast.warn("Name, Position, and Description cannot be empty");
+        return;
+      }
+  
+      let result;
+  
+      if (isEdit) {
+        result = await dispatch(updateUser({ id: Number(id), ...trimmedValues })).unwrap();
+      } else {
+        result = await dispatch(createUser(trimmedValues)).unwrap();
+      }
+  
+      // ✅ Navigate only if operation was successful
+      if (result?.message === "success") {
+        
+        navigate("/userDetails"); // Change this to your desired route
+      }
+    } catch (error: any) {
+      if (error === "Unauthorized! Please log in again.") {
+        toast.error("Session expired! Please log in again.");
+        // navigate("/login");  // Uncomment this if you want to redirect to login
+      } else {
+        toast.error(error || "Something went wrong!");
+      }
+    }
   };
-
-
+  
+  
   
   return (
     <>

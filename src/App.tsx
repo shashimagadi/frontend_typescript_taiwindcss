@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import UserDetails from "./components/UserDetails";
 import UserForm from "./components/UserForm";
 import Navbar from "./components/Navbar"; // Import Navbar
+import SendMail from "./components/SendMail/SendMail";
 
 // Wrapper component to conditionally show Navbar
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -29,7 +30,8 @@ const ProtectedRoutes = () => {
   const token = localStorage.getItem("authToken");
 
   if (!token) {
-    return <Navigate to="/" replace />;
+    
+    // return <Navigate to="/" replace />;
   }
 
   return (
@@ -38,6 +40,8 @@ const ProtectedRoutes = () => {
       <Route path="/userDetails" element={<UserDetails />} />
       <Route path="/userForm" element={<UserForm />} />
       <Route path="/edit/:id" element={<UserForm />} />
+      <Route path="/sendMail" element={<SendMail />} />
+      
     </Routes>
   );
 };

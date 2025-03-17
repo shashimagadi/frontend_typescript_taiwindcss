@@ -28,37 +28,79 @@ const initialState: UserState = {
 
 //  GET USERS
 export const getUsers = createAsyncThunk("users/getUsers", async () => {
-  const response = await api.get(`/userDetails/getUserDetails`);
-  return response.data;
-});
-
-// CREATE USER
-export const createUser = createAsyncThunk("users/createUser", async (user: UserDetails) => {
-    
-    
-  const response = await api.post(`/userDetails/createUserDetails`, user);
-  if(response.data.message==='success'){
-    toast.success("User created successfully!");
+  try{
+    const response = await api.get(`/userDetails/getUserDetails`);
+    return response.data;
+  }
+  catch(err){
+    toast.warn("Failed to Fetch user!");
   }
   
-  return response.data;
 });
 
-//  UPDATE USER
-export const updateUser = createAsyncThunk("users/updateUser", async (user: UserDetails) => {
-  const response = await api.put(`/userDetails/updateUserDetails/${user.id}`, user);
-  console.log("response dtaaaaaa ", response.data);
-  if(response.data.message==='success'){
-    toast.success("User updated successfully!");
+
+
+export const createUser = createAsyncThunk(
+  "users/createUser",
+  async (user: UserDetails, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/userDetails/createUserDetails`, user);
+
+      if (response.data.message === "success") {
+        toast.success("User created successfully!");
+        return response.data;
+      } else {
+        toast.warn("Failed to create user!");
+        return rejectWithValue("Failed to create user!");
+      }
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        toast.error("Unauthorized! Please log in again.");
+      } else {
+        toast.error("Failed to create user. Server might be down!");
+      }
+      return rejectWithValue(err.response?.data?.message || "Failed to create user.");
+    }
   }
-  
-  return response.data;
-});
+);
+
+export const updateUser = createAsyncThunk(
+  "users/updateUser",
+  async (user: UserDetails, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/userDetails/updateUserDetails/${user.id}`, user);
+
+      if (response.data.message === "success") {
+        toast.success("User updated successfully!");
+        return response.data;
+      } else {
+        toast.warn("Failed to update user!");
+        return rejectWithValue("Failed to update user!");
+      }
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        toast.error("Unauthorized! Please log in again.");
+      } else {
+        toast.error("Failed to update user. Server might be down!");
+      }
+      return rejectWithValue(err.response?.data?.message || "Failed to update user.");
+    }
+  }
+);
+
 
 // DELETE USER
 export const deleteUser = createAsyncThunk("users/deleteUser", async (id: number) => {
-  await api.delete(`/userDetails/deleteUserDetails/${id}`);
-  return id; // Return the ID to remove from the Redux state
+
+  try{
+    const response=   await api.delete(`/userDetails/deleteUserDetails/${id}`);
+     return id; 
+    // return response.data; 
+  }
+  catch(err){
+    toast.error("Unauthorized Request Plz Login");
+  }
+  
 });
 
 const userSlice = createSlice({
@@ -84,7 +126,7 @@ const userSlice = createSlice({
         
       })
       .addCase(createUser.rejected, (state) => {
-        toast.error("Failed to create user");
+        
       })
       // UPDATE USER
       .addCase(updateUser.fulfilled, (state, action) => {
@@ -95,12 +137,12 @@ const userSlice = createSlice({
         }
       })
       .addCase(updateUser.rejected, (state) => {
-        toast.error("Failed to update user");
+        
       })
       // DELETE USER
       .addCase(deleteUser.fulfilled, (state, action) => {
         state.users = state.users.filter((user) => user.id !== action.payload);
-        toast.success("User deleted successfully!");
+        // toast.success("User deleted successfully!");
       })
       .addCase(deleteUser.rejected, (state) => {
         toast.error("Failed to delete user");

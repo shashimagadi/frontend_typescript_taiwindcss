@@ -23,7 +23,7 @@ const UserDetails = () => {
           dispatch(getUsers());
         } else {
           toast.error("Unauthorized! Please login first.");
-          navigate("/"); // Redirect to login if no token
+          
         }
       }, [dispatch, navigate]);
 
@@ -48,31 +48,42 @@ const UserDetails = () => {
     },
   ];
 
-//   const handleDelete = (id: number) => {
-//     alert("delete")
-//     Modal.confirm({
-//       title: "Are you sure?",
-//       content: "This action cannot be undone.",
-//       okText: "Yes, Delete",
-//       okType: "danger",
-//       cancelText: "Cancel",
-//       onOk: async () => {
-//         await dispatch(deleteUser(id));
-//         message.success("User deleted successfully!");
-//       },
-//     });
-//   };
- 
-const handleDelete = (id: number) => {
-   
-    showModal(
-      'Are you sure you want to delete this user?', // Message
-      () => {
-        dispatch(deleteUser(id));
+
+// const handleDelete =async (id: number) => {
+//    let result;
+//     showModal(
+//       'Are you sure you want to delete this user?', // Message
+//       () => {
+//         dispatch(deleteUser(id));
         
+//       }
+//     );
+//   };
+const handleDelete = async (id?: number) => {
+  if (!id) {
+    toast.warn("Invalid user ID. Please try again!");
+    return;
+  }
+
+  showModal(
+    "Are you sure you want to delete this user?", // Message
+    async () => {
+      try {
+        const result = await dispatch(deleteUser(id)).unwrap(); // Ensure proper error handling
+
+        if (result) {
+          toast.success("User deleted successfully!");
+        } else {
+          console.log("Failed to delete user!");
+        }
+      } catch (error) {
+        toast.error("Failed to delete user!");
       }
-    );
-  };
+    }
+  );
+};
+
+
 
 return (
     <>

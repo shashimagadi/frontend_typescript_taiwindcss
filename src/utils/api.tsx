@@ -29,7 +29,7 @@ api.interceptors.response.use(
       const message = error.response.data.message;
 
       if (message === "Token expired") {
-        toast.error("Session expired! Please log in again."); // Show toast message
+        // toast.error("Session expired! Please log in again."); // Show toast message
         localStorage.removeItem("authToken"); // Remove expired token
       } else {
         toast.error("Unauthorized! Please log in.");
